@@ -33,7 +33,7 @@ jobs:
           set +e
           timeout 10s qemu-system-x86_64 \
             -accel kvm \
-            -machine pc,accel=kvm \
+            -machine pc \
             -cpu qemu64 \
             -m 256M \
             -nodefaults \
