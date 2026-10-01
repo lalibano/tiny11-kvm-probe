@@ -106,6 +106,15 @@ jobs:
           mkdir -p build
           python scripts/make_autounattend.py build/Autounattend.xml
 
+      - name: Inspect ISO boot metadata
+        run: |
+          set -euo pipefail
+          ISO="$(cat build/iso-path.txt)"
+          file "$ISO"
+          isoinfo -d -i "$ISO" || true
+          echo 'ISO boot and setup files:'
+          isoinfo -f -i "$ISO" | grep -Ei '(/EFI/|/BOOT/|INSTALL\.WIM|INSTALL\.ESD)' | head -80 || true
+
       - name: Build the preinstalled qcow2 with KVM
         run: |
           set -euo pipefail
