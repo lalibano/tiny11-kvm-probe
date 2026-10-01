@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate a UEFI/GPT Autounattend.xml without printing the password."""
+"""Generate a BIOS/MBR Autounattend.xml without printing the password."""
 from __future__ import annotations
 
 import argparse
@@ -43,17 +43,16 @@ Set-Content -LiteralPath 'C:\KaggleImageReady.txt' -Value 'Windows installation 
       <DiskConfiguration>
         <Disk wcm:action="add"><DiskID>0</DiskID><WillWipeDisk>true</WillWipeDisk>
           <CreatePartitions>
-            <CreatePartition wcm:action="add"><Order>1</Order><Type>EFI</Type><Size>100</Size></CreatePartition>
-            <CreatePartition wcm:action="add"><Order>2</Order><Type>MSR</Type><Size>16</Size></CreatePartition>
-            <CreatePartition wcm:action="add"><Order>3</Order><Type>Primary</Type><Extend>true</Extend></CreatePartition>
+            <CreatePartition wcm:action="add"><Order>1</Order><Type>Primary</Type><Size>100</Size></CreatePartition>
+            <CreatePartition wcm:action="add"><Order>2</Order><Type>Primary</Type><Extend>true</Extend></CreatePartition>
           </CreatePartitions>
           <ModifyPartitions>
-            <ModifyPartition wcm:action="add"><Order>1</Order><PartitionID>1</PartitionID><Format>FAT32</Format><Label>System</Label></ModifyPartition>
-            <ModifyPartition wcm:action="add"><Order>3</Order><PartitionID>3</PartitionID><Format>NTFS</Format><Label>Windows</Label><Letter>W</Letter></ModifyPartition>
+            <ModifyPartition wcm:action="add"><Order>1</Order><PartitionID>1</PartitionID><Active>true</Active><Format>NTFS</Format><Label>System</Label></ModifyPartition>
+            <ModifyPartition wcm:action="add"><Order>2</Order><PartitionID>2</PartitionID><Format>NTFS</Format><Label>Windows</Label><Letter>W</Letter></ModifyPartition>
           </ModifyPartitions>
         </Disk>
       </DiskConfiguration>
-      <ImageInstall><OSImage><InstallTo><DiskID>0</DiskID><PartitionID>3</PartitionID></InstallTo><InstallToAvailablePartition>false</InstallToAvailablePartition></OSImage></ImageInstall>
+      <ImageInstall><OSImage><InstallTo><DiskID>0</DiskID><PartitionID>2</PartitionID></InstallTo><InstallToAvailablePartition>false</InstallToAvailablePartition></OSImage></ImageInstall>
       <UserData><AcceptEula>true</AcceptEula><FullName>RDP</FullName><Organization>Kaggle</Organization></UserData>
     </component>
   </settings>
