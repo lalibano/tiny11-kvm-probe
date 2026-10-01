@@ -72,6 +72,9 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y qemu-system-x86 qemu-utils dosfstools mtools genisoimage
+          # /dev/kvm is present on the hosted runner but may not be writable by the runner user.
+          sudo chmod 666 /dev/kvm
+          stat /dev/kvm
 
       - name: Install Kaggle CLI
         run: python -m pip install --upgrade kaggle
