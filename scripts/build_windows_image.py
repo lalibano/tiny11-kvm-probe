@@ -55,8 +55,11 @@ def main() -> int:
     serial = args.workdir / "serial.log"
     stderr = args.workdir / "qemu.stderr.log"
     screen = args.workdir / "screen.ppm"
+    uefi_vars = args.workdir / "OVMF_VARS.fd"
+    ovmf_code = Path("/usr/share/OVMF/OVMF_CODE_4M.fd")
+    ovmf_template = Path("/usr/share/OVMF/OVMF_VARS_4M.fd")
 
-    for p in (args.output, floppy, monitor, serial, stderr, screen):
+    for p in (args.output, floppy, monitor, serial, stderr, screen, uefi_vars):
         if p.exists():
             p.unlink()
 
@@ -64,6 +67,9 @@ def main() -> int:
     run(["qemu-img", "create", "-f", "raw", str(floppy), "1.44M"], stdout=subprocess.DEVNULL)
     run(["mkfs.fat", "-F", "12", str(floppy)], stdout=subprocess.DEVNULL)
     run(["mcopy", "-i", str(floppy), str(args.autounattend), "::/Autounattend.xml"])
+    if not ovmf_code.exists() or not ovmf_template.exists():
+        raise FileNotFoundError("OVMF UEFI firmware is required for this Windows ISO")
+    shutil.copyfile(ovmf_template, uefi_vars)
 
     qemu = [
         "qemu-system-x86_64",
@@ -72,10 +78,12 @@ def main() -> int:
         "-cpu", "qemu64",
         "-m", "4G",
         "-smp", "2",
+        "-drive", f"if=pflash,format=raw,readonly=on,file={ovmf_code}",
+        "-drive", f"if=pflash,format=raw,file={uefi_vars}",
         "-drive", f"file={args.output},if=ide,format=qcow2",
         "-cdrom", str(args.iso),
         "-drive", f"file={floppy},if=floppy,format=raw",
-        "-boot", "menu=off,once=d",
+        "-boot", "menu=off,strict=on,order=d",
         "-netdev", "user,id=net0,hostfwd=tcp:127.0.0.1:3389-:3389",
         "-device", "e1000,netdev=net0",
         "-vga", "std",

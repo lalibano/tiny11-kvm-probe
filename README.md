@@ -11,7 +11,7 @@ GitHub's public `ubuntu-latest` runner exposed `/dev/kvm` in the probe. The priv
 Run **Actions → Build preinstalled Tiny11 image → Run workflow**.
 
 - `probe` verifies KVM without using secrets.
-- `build` downloads the private ISO from Kaggle, performs unattended BIOS/MBR installation with QEMU/KVM, and waits for a real RDP handshake.
+- `build` downloads the private ISO from Kaggle, performs unattended UEFI/GPT installation with QEMU/KVM, and waits for a real RDP handshake. The UEFI path is required because the Tiny11 25H2 ISO does not expose a usable SeaBIOS boot path on the hosted runner.
 - `publish_dataset=true` uploads the resulting qcow2 to the configured private Kaggle dataset.
 
 The build mode requires one of these GitHub Actions secret configurations:
