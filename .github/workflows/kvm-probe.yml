@@ -1,0 +1,45 @@
+name: Probe KVM availability
+
+on:
+  workflow_dispatch:
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Install QEMU
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-system-x86 qemu-utils
+
+      - name: Check for KVM
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Runner: $RUNNER_NAME"
+          uname -a
+          if [ ! -c /dev/kvm ]; then
+            echo 'RESULT: /dev/kvm is not available on this public runner.'
+            exit 1
+          fi
+          sudo chmod 666 /dev/kvm
+          stat /dev/kvm
+          qemu-system-x86_64 --version
+
+      - name: Run KVM smoke test
+        shell: bash
+        run: |
+          set +e
+          timeout 10s qemu-system-x86_64 \
+            -accel kvm \
+            -machine pc,accel=kvm \
+            -cpu qemu64 \
+            -m 256M \
+            -nodefaults \
+            -display none \
+            -S
+          rc=$?
+          set -e
+          test "$rc" -eq 124
+          echo 'RESULT: KVM is available and QEMU started with KVM acceleration.'
